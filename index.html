@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f1419" id="tc"><meta name="color-scheme" content="dark light"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<script>(function(){try{var d=document.documentElement,z=+localStorage.dos_zoom||90;if(z<80||z>120)z=90;d.style.setProperty("--ui-scale",z/100);
+var t=localStorage.dos_theme;if(t!=="light"&&t!=="dark"){var old=localStorage.dos_v1||localStorage.dos_cfg;t=old?"dark":(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark")}
+d.dataset.theme=t;if(t==="light")document.getElementById("tc").content="#f6f4ef"}catch(e){document.documentElement.dataset.theme="dark"}})()</script>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="./icon.svg"><link rel="apple-touch-icon" href="./icon-192.png">
+<title>Discipline OS</title><link rel="stylesheet" href="styles.css"></head><body>
+<main id="app"><noscript>Discipline OS ko JavaScript chahiye.</noscript></main>
+<nav id="nav" aria-label="Main sections"></nav>
+<div id="urge" hidden></div><div id="lock" hidden></div><div id="modal" hidden></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="upd" hidden>Naya version aa gaya. <button onclick="location.reload()">Reload</button></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js"></script>
+<script src="namaz.js"></script><script src="duas.js"></script><script src="gym.js"></script><script src="diet.js"></script><script src="finance.js"></script><script src="app.js"></script></body></html>
