@@ -2,22 +2,22 @@
    never CSS zoom, so Chart.js and layout measurements stay correct. */
 :root{--ui-scale:.9;font-size:calc(16px * var(--ui-scale));-webkit-text-size-adjust:100%;text-size-adjust:100%;
 --bg:#0f1419;--bg2:#131a22;--card:#18202a;--card2:#1e2936;--line:#263241;--tx:#e8e5de;--mut:#93a0b0;--teal:#6fb7a8;--teal-s:#6fb7a826;--gold:#d4af5a;--gold-s:#d4af5a22;--bad:#d98a8a;--ok:#7ccf9c;
---nav:#0f1419f2;--inp:#0f1419;--btn:#212d3b;--on:#0f1419;--gt:#1a1405;--sh:#0006;--glow:#6fb7a833;
+--nav:#0f1419;--inp:#0f1419;--btn:#212d3b;--on:#0f1419;--gt:#1a1405;--sh:#0006;--glow:#6fb7a833;
 --s1:.25rem;--s2:.5rem;--s3:.75rem;--s4:1rem;--s5:1.5rem;--s6:2rem;--r1:.5rem;--r2:.75rem;--r3:1.125rem;--r4:1.5rem;--rp:999px;
 --t-xs:.72rem;--t-sm:.82rem;--t-md:1rem;--t-lg:1.25rem;--t-xl:1.6rem;--d1:120ms;--d2:220ms;--d3:480ms;--ease:cubic-bezier(.2,.8,.2,1);
 --tap:max(44px,2.75rem);--nav-h:4rem;
 --font:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Helvetica Neue",Arial,sans-serif;
 --arabic:"Amiri Quran","Amiri","Noto Naskh Arabic","Scheherazade New","Traditional Arabic","Geeza Pro","Droid Arabic Naskh","Arabic Typesetting",serif;color-scheme:dark}
 :root[data-theme=light]{--bg:#f6f4ef;--bg2:#efebe2;--card:#ffffff;--card2:#faf8f3;--line:#e2ddd1;--tx:#1d252e;--mut:#5f6b79;--teal:#237a6d;--teal-s:#237a6d1f;--gold:#8a6718;--gold-s:#8a67181c;--bad:#b04a4a;--ok:#2c7d4d;
---nav:#f6f4eff2;--inp:#faf8f4;--btn:#efebe2;--on:#ffffff;--gt:#ffffff;--sh:#0001;--glow:#237a6d22;color-scheme:light}
+--nav:#f6f4ef;--inp:#faf8f4;--btn:#efebe2;--on:#ffffff;--gt:#ffffff;--sh:#0001;--glow:#237a6d22;color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scrollbar-gutter:stable;scroll-padding-bottom:calc(var(--nav-h) + 1rem)}
-html,body{margin:0;background:var(--bg);color:var(--tx);font:var(--t-md)/1.5 var(--font);overflow-x:hidden}
-body{overscroll-behavior-y:contain}
-#app{max-width:61rem;margin:auto;padding:calc(var(--s4) + env(safe-area-inset-top)) var(--s4) calc(var(--nav-h) + 2.5rem + env(safe-area-inset-bottom));min-height:100vh}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:var(--t-md)/1.5 var(--font)}
+/* NOTE: never put overflow-x:hidden on html AND body: it turns body into its own scroller and breaks touch scrolling */
+#app{max-width:61rem;margin:auto;padding:calc(var(--s4) + env(safe-area-inset-top)) var(--s4) calc(var(--nav-h) + 2.5rem + env(safe-area-inset-bottom));min-height:100vh;min-height:100dvh;overflow-x:clip}
 h1,h2,h3,h4{margin:.2em 0;font-weight:650;letter-spacing:-.005em}h1{font-size:var(--t-xl)}h2{font-size:1.05rem;color:var(--gold);margin-top:1.4em}h3{font-size:1.02rem}h4{font-size:.9rem;color:var(--teal);margin:1em 0 .2em}
 .mut{color:var(--mut);font-size:var(--t-sm)}.q{font-size:var(--t-sm);color:var(--mut);font-style:italic;margin:var(--s2) 0}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r3);padding:var(--s4);margin:var(--s3) 0;box-shadow:0 .4rem 1.2rem var(--sh)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r3);padding:var(--s4);margin:var(--s3) 0;box-shadow:0 .1rem .4rem var(--sh)}
 .hero{background:linear-gradient(145deg,var(--card2),var(--card));border-color:color-mix(in srgb,var(--teal) 35%,var(--line));position:relative;overflow:hidden}
 .hero::before{content:"";position:absolute;inset:-40% -20% auto auto;width:60%;aspect-ratio:1;background:radial-gradient(circle,var(--glow),transparent 70%);pointer-events:none}
 .hd{display:flex;justify-content:space-between;align-items:center;gap:var(--s3)}
@@ -64,7 +64,7 @@ ol{padding-left:1.3rem}li{margin:.4rem 0}ul{padding-left:1.2rem}
 table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{padding:.4rem;border-bottom:1px solid var(--line);text-align:left}
 .scrollx{overflow-x:auto}
 /* nav: scrollable pill bar */
-#nav{position:fixed;left:0;right:0;bottom:0;z-index:7;display:flex;gap:var(--s1);overflow-x:auto;scrollbar-width:none;background:var(--nav);border-top:1px solid var(--line);padding:var(--s1) var(--s2) calc(var(--s1) + env(safe-area-inset-bottom));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);scroll-snap-type:x proximity}
+#nav{position:fixed;left:0;right:0;bottom:0;z-index:7;display:flex;gap:var(--s1);overflow-x:auto;scrollbar-width:none;background:var(--nav);border-top:1px solid var(--line);padding:var(--s1) var(--s2) calc(var(--s1) + env(safe-area-inset-bottom));scroll-snap-type:x proximity}
 #nav::-webkit-scrollbar{display:none}
 #nav button{flex:0 0 auto;min-width:4.3rem;min-height:var(--tap);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem;background:none;border:0;border-radius:var(--r3);color:var(--mut);font-size:var(--t-xs);padding:0 var(--s2);scroll-snap-align:center;cursor:pointer;transition:background var(--d2),color var(--d2)}
 #nav svg{width:1.35rem;height:1.35rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
