@@ -1,0 +1,105 @@
+name: Build Android APK
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Prepare web files (Chart.js + adhan bundled for offline use)
+        run: |
+          mkdir www
+          cp index.html styles.css manifest.json service-worker.js icon.svg icon-192.png icon-512.png www/
+          cp app.js namaz.js duas.js gym.js diet.js finance.js www/
+          npm init -y
+          npm i chart.js@4.4.1 adhan@4.4.3 @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 @capacitor/filesystem@6 @capacitor/share@6
+
+          # Chart.js -> local file (falls back to the CDN link if the file is not found)
+          CH=$(find node_modules/chart.js/dist -name 'chart.umd.min.js' | head -1)
+          [ -z "$CH" ] && CH=$(find node_modules/chart.js/dist -name 'chart.umd.js' | head -1)
+          if [ -n "$CH" ]; then
+            cp "$CH" www/chart.umd.min.js
+            sed -i 's|https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js|chart.umd.min.js|' www/index.html
+          else
+            echo "WARNING: Chart.js bundle not found, APK will use the CDN link (needs internet)"
+          fi
+
+          # adhan -> local file (falls back to the CDN link if the file is not found)
+          AD=$(find node_modules/adhan -name 'adhan.umd.min.js' | head -1)
+          [ -z "$AD" ] && AD=$(find node_modules/adhan -name 'adhan.umd.js' | head -1)
+          if [ -n "$AD" ]; then
+            cp "$AD" www/adhan.umd.min.js
+            sed -i 's|https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js|adhan.umd.min.js|' www/index.html
+          else
+            echo "WARNING: adhan bundle not found, APK will use the CDN link (needs internet)"
+          fi
+
+      - name: Make Export Backup and calendar download work inside the app
+        run: |
+          # Android WebView ignores blob "download" links, so on the phone the files are saved
+          # to cache and the normal Android Share sheet opens (choose Files / Drive / WhatsApp...).
+          cat > www/apk-bridge.js <<'JS'
+          (function () {
+            var C = window.Capacitor;
+            if (!C || !C.isNativePlatform || !C.isNativePlatform()) return;
+            var FS = C.registerPlugin('Filesystem');
+            var SH = C.registerPlugin('Share');
+            window.dl = async function (name, txt, type) {
+              try {
+                var r = await FS.writeFile({ path: name, data: txt, directory: 'CACHE', encoding: 'utf8' });
+                await SH.share({ title: name, url: r.uri, dialogTitle: 'Save / share ' + name });
+              } catch (e) {
+                var m = String((e && e.message) || e || '');
+                if (/cancel/i.test(m)) return;
+                try { await navigator.clipboard.writeText(txt); alert('File save nahi hui (' + m + '). Backup text clipboard me copy kar diya, kisi notes app me paste karke rakh lo.'); }
+                catch (_) { alert('Export failed: ' + m); }
+              }
+            };
+          })();
+          JS
+          sed -i 's|</body>|<script src="apk-bridge.js"></script></body>|' www/index.html
+
+      - name: Create Android project
+        run: |
+          npx cap init "Discipline OS" com.disciplineos.app --web-dir www
+          npx cap add android
+          npx cap sync android
+
+      - name: Use the app icon (best effort)
+        run: |
+          if command -v convert >/dev/null 2>&1; then
+            R=android/app/src/main/res
+            for s in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+              d=${s%%:*}; px=${s##*:}
+              if [ -d "$R/mipmap-$d" ]; then
+                convert icon-512.png -resize ${px}x${px} "$R/mipmap-$d/ic_launcher.png" || true
+                convert icon-512.png -resize ${px}x${px} "$R/mipmap-$d/ic_launcher_round.png" || true
+                convert icon-512.png -resize ${px}x${px} "$R/mipmap-$d/ic_launcher_foreground.png" || true
+              fi
+            done
+            rm -rf "$R/mipmap-anydpi-v26" || true
+          else
+            echo "ImageMagick not found, keeping the default icon"
+          fi
+
+      - name: Build APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Publish APK to Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: Discipline OS APK ${{ github.run_number }}
+          files: android/app/build/outputs/apk/debug/app-debug.apk
